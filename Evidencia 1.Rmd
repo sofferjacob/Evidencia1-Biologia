@@ -35,7 +35,11 @@ analyze <- function(sequ, origin) {
   cat("Longitud de la secuencia:", length(sc), "\n")
   cat("Porcentage de GC en la secuencia: ", GC(sc), "\n")
   print("Secuencia reversa: ")
-  print(comp(sc))
+  rev <- comp(sc)
+  for (i in 1:80) {
+    cat(rev[i])
+  }
+  print(" ")
   # Creamos la tabla de composición de nucleotidos (%)
   tab <- prop.table(table(sc))
   kable(tab, caption="Composición de Nucleótidos", col.names = c("Base", "Porcentage"), label = "Tabla Composición", format="html", padding=2)
