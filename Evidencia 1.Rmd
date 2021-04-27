@@ -1,0 +1,114 @@
+---
+title: "Evidencia 1"
+author: "Jacobo Soffer - A01028653"
+date: "4/24/2021"
+output: html_document
+---
+# Evidencia 1: Análisis Inicial
+## Parte 1
+A finales del año 2019, se descubrió un nuevo virus que se originó en la ciudad de Wuhan, China. Este virus, denominado SARS-CoV-2 o Covid 19, cambió el mundo por completo. Desde su descubrimiento, han habido **145,943,305** casos de la enfermedad a nivel mundial (CSSE, 2021), y ha causado **3,091,553** muertes en todo el mundo (CSSE, 2021). En México, al día de hoy han habido 2,323,430 casos y 214,504 muertes (CSSE, 2021). En el Estado de México han habido 242,530 casos 33,643 defunciones (CSSE, 2021). En Huixquilucan, el municipio donde vivo, han habido 2,908 casos y 130 muertes causadas por Covid 19 (Gobierno del Estado de México, 2021). Se cree que la primera variante en infectar humanos tiene número de secuencia WIV04/2019 y es identificada como variante "A" (Zhukova, 2020). Sin embargo, han surgido varias variantes del virus desde su surgimiento a finales del año 2019. Inclusive, la variante D614G, que surgió en febrero de 2020, remplazó al virus identificado en China, y para Junio de 2020 se convirtió en la variante dominante (WHO, 2020). Otras variantes importantes que se han identificado son:
+
+* B.1.1.7: Identificada en Reino Unido en febrero del 2020, se transmite más facilmente y puede ser más letal.
+* B.1.351: Identificada en Octubre del 2020 en Sudáfrica, la variante se transmite más facil y es más resistente a anticuerpos generados por una infección previa.
+* P.1: Identificada en Brazil y Japón en diciembre del 2020, es más resistente a anticuerpos generados por una infección previa.
+* B.1.427/B.1.429: Identificadas en Estados Unidos en Junio de 2020, se transmite más facil, tiene un impacto significativo en algunos tratamientos y es moderadamente más resistente a anticuerpos generados en infecciones previas o por vacunas.
+(DeSimone, 2021).
+
+Para buscar información de las variantes que estan circulando en México, empezaría con una busqueda en Google, y de ahí buscaría una página confiable como la de la Secretaría de Salud o alguna del gobierno de los estados de la república, de una institución como Johns Hopkins, o inclusive un articulo en PubMed.
+
+### Caso del Doctor Li Wenliang
+Li Wenliang era un doctor en China, y fue de los primeros en advertir del nuevo virus y sus efectos. Corrió un gran riesgo al hacer esto, ya que sus acciones fueron consideradas ilegales y pudo haber sido arrestado. Y en efecto, fue interrogado por la policía de Wuhan, quienes lo forzaron a decir que fue un rumor. Días despues, el doctor contrajo el virus y murió. Si yo estuviera en una situación similar a la de Li, reportaría lo sucedido a la prensa. Tomaría esta decision porque es la forma en la que le podría avisar a la mayor cantidad de personas posibles y forzar a que se tome acción para prevenir que la situación evolucione a algo grave. Aunque habría riesgo en hacer esto, vale la pena, pues esa acción puede salvar millones de vidas y prevenir crisis en varios aspectos, como en salud y economico, así como poder tener más tiempo para manejar la situación.  
+
+## Parte 2
+Primero que nada, instalamos las librerías que se van a usar en el programa. Usaremos `seqinr` para analizar y realizar operaciones en secuencias de ADN. Usaremos `knitr` para crear tablas.
+```{r}
+install.packages("seqinr", repos = "http://cran.us.r-project.org")
+library(seqinr)
+library(knitr)
+```
+Ahora definimos una funcion que realizará el analizis necesario para cada secuencia. La siguiente función toma una secuencia como argumento, hace el análisis requerido y regresa un objeto `table` con su composición de nucleotidos (%):
+```{r}
+analyze <- function(sequ, origin) {
+  cat("Nombre de la secuencia: ", getName(sequ), "\n")
+  cat("Lugar de origen: ", origin, "\n")
+  sc <- getSequence(sequ)[[1]]
+  cat("Longitud de la secuencia:", length(sc), "\n")
+  cat("Porcentage de GC en la secuencia: ", GC(sc), "\n")
+  print("Secuencia reversa: ")
+  print(comp(sc))
+  # Creamos la tabla de composición de nucleotidos (%)
+  tab <- prop.table(table(sc))
+  kable(tab, caption="Composición de Nucleótidos", col.names = c("Base", "Porcentage"), label = "Tabla Composición", format="html", padding=2)
+  return(tab)
+}
+```
+Ahora cargamos las secuencias del virus SARS-CoV-2, las cuales estan almacenadas en formato FASTA, del disco duro. Se descargaron dos secuencias del virus en los siguientes paises:
+
+* China (incluyendo la secuencia original)
+* México
+* Estados Unidos
+* Israel
+* Reino Unido
+
+Para cargar las secuencias usamos la función `read.fasta()`, que nos brinda la librería `sequinr`.
+```{r}
+cn1 <- read.fasta("china_wuhan.fasta")
+cn2 <- read.fasta("china_2021_MW691151.fasta")
+mx1 <- read.fasta("mexico_2020_MT810758.fasta")
+mx2 <- read.fasta("mexico_2021_MW884219.fasta")
+us1 <- read.fasta("us_2021_MZ021680.fasta")
+us2 <- read.fasta("us_2021_MW976750.fasta")
+il1 <- read.fasta("il_2021_MW674808.fasta")
+il2 <- read.fasta("il_2021_MW674811.fasta")
+uk1 <- read.fasta("uk_2021_OD906774.fasta")
+uk2 <- read.fasta("uk_2021_OD906800.fasta")
+```
+Ahora ejecutamos el analísis de cada uno y almacenamos el resultado en un vector:
+
+```{r}
+results <- c(
+  cn1 = analyze(cn1, "China"),
+  cn2 = analyze(cn2, "China"),
+  mx1 = analyze(mx1, "México"),
+  mx2 = analyze(mx2, "México"),
+  us1 = analyze(us1, "Estados Unidos"),
+  us2 = analyze(us2, "Estados Unidos"),
+  il1 = analyze(il1, "Israel"),
+  il2 = analyze(il2, "Israel"),
+  uk1 = analyze(uk1, "Reino Unido"),
+  uk2 = analyze(uk2, "Reino Unido")
+)
+```
+Y creamos una gráfica para comparar los resultados:
+```{r}
+barplot(results,
+  main = "Comparación de Composición de Nuclueótidos",
+  xlab = "Nucleótidos",
+  ylab = "%",
+  col = "blue"
+)
+print(results)
+```
+Como se puede observar en la gráfica anterios, todas las secuencias usadas tienen una composición de nucleotidos muy similar. En promedio, todos estan compuestos por 29 % de adenina, 18 % de citosina, 19 % de guanina, y 32 % de timina, este siendo el más abundante en las secuencias. De hecho, podemos decir que todos tienen las mismas proporciones de estos nucleótidos, ya que difieren solo en milesimas y al ser redondeados son iguales. Esto nos puede decir que se seleccionaron variantes muy similares, y si nos basamos exclusivamente en la composición de nucleótidos, podríamos decir que son casi identicas. Sin embargo, cabe notar que se necesitaría un analizis más profundo para poder llegar a esta conclusión, como por ejemplo, un alineamiento de las secuencias, ya que la composición de nucleótidos no es una métrica suficiente para poder llegar a esta conclusión, y una mutación pequeña en el lugar correcto puede tener un impacto grande.
+
+## Lista de referencias
+
+### Fuentes bibliográficas
+
+* Johns Hopkins University. (2021). COVID-19 Dashboard by the Center for Systems Science and Engineering (CSSE). Recuperado de: [https://coronavirus.jhu.edu/map.html](https://coronavirus.jhu.edu/map.html)
+
+* Gobierno del Estado de México. (2021). Casos positivos y defunciones a COVID-19 por municipio. Recuperado de [https://salud.edomex.gob.mx/salud/covid19_municipio](https://salud.edomex.gob.mx/salud/covid19_municipio).
+
+* Zhukova A, Blassel L, Lemoine F, Morel M, Voznica J, Gascuel O (November 2020). "Origin, evolution and global spread of SARS-CoV-2". Recuperado de: [https://comptes-rendus.academie-sciences.fr/biologies/item/CRBIOL_0__0_0_A1_0/](https://comptes-rendus.academie-sciences.fr/biologies/item/CRBIOL_0__0_0_A1_0/).
+
+* WHO. (2020). SARS-CoV-2 Variants. Recuperado de: [https://www.who.int/csr/don/31-december-2020-sars-cov2-variants/en/](https://www.who.int/csr/don/31-december-2020-sars-cov2-variants/en/).
+
+* DeSimone, D. (2021). COVID-19 variants: What's the concern?. Recuperado de: [https://www.mayoclinic.org/diseases-conditions/coronavirus/expert-answers/covid-variant/faq-20505779](https://www.mayoclinic.org/diseases-conditions/coronavirus/expert-answers/covid-variant/faq-20505779)
+
+
+### Librerías utilizadas en el código
+
+```{r}
+citation("seqinr")
+citation("knitr")
+```
